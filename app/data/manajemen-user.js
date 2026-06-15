@@ -1,0 +1,38 @@
+export const manajemenUser = [
+  {
+    id: 1,
+    nama: "Ahmad Hermawan",
+    username: "Ahmad",
+    jabatan: "Programmer",
+    departemen: "produksi",
+    role: "Admin",
+    isActive: true,
+  },
+  {
+    id: 2,
+    nama: "Riko Salim",
+    username: "Riko",
+    jabatan: "System Analist",
+    departemen: "Produksi",
+    role: "Admin",
+    isActive: true,
+  },
+  {
+    id: 3,
+    nama: "Dhea Angela",
+    username: "Dhea",
+    jabatan: "Akuntan",
+    departemen: "Finance",
+    role: "Admin",
+    isActive: false,
+  },
+  {
+    id: 4,
+    nama: "Shani Ratnasari",
+    username: "Shani",
+    jabatan: "Manager Produksi",
+    departemen: "Direksi",
+    role: "Super Admin",
+    isActive: true,
+  },
+];

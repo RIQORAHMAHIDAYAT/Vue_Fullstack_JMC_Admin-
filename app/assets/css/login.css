@@ -1,0 +1,61 @@
+.page-login {
+  background: #fff;
+  width: 100%;
+  overflow: hidden;
+  height: 100vh;
+}
+
+.login-cover {
+  position: relative;
+}
+
+.login-cover img.cover {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  position: absolute;
+  inset: 0;
+  object-position: center right;
+}
+
+.login-cover img.object {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  position: absolute;
+  inset: 0;
+  object-position: center bottom;
+  z-index: 2;
+}
+
+.login-cover:before {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(51, 51, 51, 0) 0%, #212121 100%);
+  z-index: 2;
+}
+
+.login-cover .caption {
+  position: relative;
+  z-index: 3;
+  padding: 40px;
+}
+
+.login-cover .caption h3 {
+  font-size: 2rem;
+}
+
+.logo img {
+  height: 30px;
+  width: auto;
+}
+
+.text-red {
+  color: red;
+}
+
+@media (max-width: 800px) {
+  .page-login {
+    overflow: auto;
+  }
+}

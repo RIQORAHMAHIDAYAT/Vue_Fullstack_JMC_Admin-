@@ -1,0 +1,28 @@
+{
+  "name": "nuxt-tabler-admin",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
+  },
+  "dependencies": {
+    "@tabler/core": "1.0.0-beta24",
+    "@tabler/icons-vue": "^3.44.0",
+    "apexcharts": "^3.54.0",
+    "jquery": "^3.7.1",
+    "nuxt": "^4.0.0",
+    "swiper": "^12.1.4",
+    "vue": "latest",
+    "vue-recaptcha": "^3.0.0-alpha.2",
+    "vue-router": "latest",
+    "vue3-apexcharts": "1.6.0"
+  },
+  "devDependencies": {
+    "vite-plugin-commonjs": "^0.10.4"
+  }
+}

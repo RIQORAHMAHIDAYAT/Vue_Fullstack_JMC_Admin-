@@ -1,0 +1,57 @@
+/* ============================================
+   main.css — Global overrides & custom styles
+   ============================================ */
+
+/* Smooth theme transition */
+body,
+body * {
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+/* Floating navbar */
+#navbar {
+  transition: box-shadow 0.3s ease, background-color 0.2s ease;
+}
+
+#navbar.float {
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.1);
+}
+
+[data-bs-theme='dark'] #navbar.float {
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.4);
+}
+
+/* Sidebar collapse animation */
+.sidebar {
+  transition: width 0.2s ease;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 3px;
+}
+
+[data-bs-theme='dark'] ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Page transition */
+.page-enter-active,
+.page-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.page-enter-from,
+.page-leave-to {
+  opacity: 0;
+}
