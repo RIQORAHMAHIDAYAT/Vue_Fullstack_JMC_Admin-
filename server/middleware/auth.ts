@@ -1,47 +1,45 @@
-import { verifyToken } from "../utils/jwt"
-import { defineEventHandler, getHeader, createError } from "h3"
-import pool from "../utils/db"
-import { enforcePermission } from "../utils/permission"
+import { defineEventHandler, getCookie, createError } from "h3";
+import jwt from "jsonwebtoken";
+import process from "node:process";
 
-const publicRoutes = ["/api/auth/login", "/api/auth/logout", "/api/auth/verify", "/api/health"]
+export default defineEventHandler((event) => {
+  const routerPath = event.node.req.url || "";
 
-export default defineEventHandler(async (event) => {
-  if (!event.path.startsWith("/api/")) return
-  if (publicRoutes.includes(event.path)) return
+  // 1. Daftar rute API yang bebas diakses secara publik (tanpa login)
+  const isPublicRoute = 
+    routerPath.startsWith("/api/auth") || 
+    routerPath.includes("login") || 
+    routerPath.includes("captcha") || 
+    routerPath.includes("recaptcha") || 
+    routerPath.includes("verify");
 
-  const authHeader = getHeader(event, "authorization")
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    throw createError({ statusCode: 401, message: "Unauthorized" })
+  // Jika ini bukan rute API, atau ini adalah rute publik, biarkan lolos
+  if (!routerPath.startsWith("/api") || isPublicRoute) {
+    return;
   }
 
-  const token = authHeader.split(" ")[1]
-  let decoded: any
+  // 2. Ambil token dari cookie 'auth_session' untuk rute yang dilindungi
+  const token = getCookie(event, "auth_session");
+
+  // Jika token tidak ada di cookie, langsung tolak aksesnya
+  if (!token) {
+    throw createError({
+      statusCode: 401,
+      message: "Akses ditolak. Silakan login terlebih dahulu.",
+    });
+  }
+
   try {
-    decoded = verifyToken(token) as any
-  } catch {
-    throw createError({ statusCode: 401, message: "Token invalid atau expired" })
+    // 3. Verifikasi apakah token JWT tersebut valid
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || "rahasia_superadmin_fwdjmc");
+
+    // 4. Simpan data user hasil decode ke dalam context event
+    event.context.user = decoded;
+    
+  } catch (error) {
+    throw createError({
+      statusCode: 401,
+      message: "Sesi Anda telah berakhir. Silakan login kembali.",
+    });
   }
-
-  const [rows] = await pool.query(
-    `SELECT u.id, u.id_role, u.disabled, ur.nama_role
-     FROM user u
-     LEFT JOIN user_role ur ON u.id_role = ur.id
-     WHERE u.id = ?`,
-    [decoded.id],
-  )
-
-  const user = (rows as any[])[0]
-  if (!user || user.disabled) {
-    throw createError({ statusCode: 401, message: "Akun dinonaktifkan" })
-  }
-
-  event.context.auth = {
-    id: user.id,
-    id_role: user.id_role,
-    nama_role: user.nama_role,
-    username: decoded.username,
-    nama: decoded.nama,
-  }
-
-  await enforcePermission(event, user.id_role)
-})
+});

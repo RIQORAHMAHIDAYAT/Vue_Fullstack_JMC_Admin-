@@ -73,6 +73,7 @@ import { IconEye, IconEyeOff } from "@tabler/icons-vue"
 const config = useRuntimeConfig()
 const { login } = useAuth()
 const router = useRouter()
+const tokenCookie = useCookie("auth_session", { maxAge: 60 * 60 * 8, path: "/" })
 
 const siteKey = config.public.recaptchaSiteKey
 const loading = ref(false)
@@ -127,31 +128,33 @@ async function handleLogin() {
   loading.value = true
   error.value = ""
 
-  if (googleCaptchaReady.value) {
-    const recaptchaToken = getRecaptchaToken()
-    if (!recaptchaToken) {
-      error.value = "Harap verifikasi captcha terlebih dahulu"
-      loading.value = false
-      return
+  try {
+    let res
+    if (googleCaptchaReady.value) {
+      const recaptchaToken = getRecaptchaToken()
+      if (!recaptchaToken) {
+        error.value = "Harap verifikasi captcha terlebih dahulu"
+        loading.value = false
+        return
+      }
+      res = await login(form.username, form.password, form.remember, recaptchaToken)
+    } else {
+      if (!captchaChecked.value) {
+        error.value = "Harap centang verifikasi 'Saya bukan robot'"
+        loading.value = false
+        return
+      }
+      res = await login(form.username, form.password, form.remember)
     }
-    try {
-      await login(form.username, form.password, form.remember, recaptchaToken)
-      router.push("/")
-    } catch (err) {
-      error.value = err.message || "Login gagal"
+
+    // Set cookie di client agar middleware langsung bisa membacanya
+    if (res?.token) {
+      tokenCookie.value = res.token
     }
-  } else {
-    if (!captchaChecked.value) {
-      error.value = "Harap centang verifikasi 'Saya bukan robot'"
-      loading.value = false
-      return
-    }
-    try {
-      await login(form.username, form.password, form.remember)
-      router.push("/")
-    } catch (err) {
-      error.value = err.message || "Login gagal"
-    }
+
+    await router.push("/")
+  } catch (err) {
+    error.value = err.message || "Login gagal"
   }
 
   loading.value = false
