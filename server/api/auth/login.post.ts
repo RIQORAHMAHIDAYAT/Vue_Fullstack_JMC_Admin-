@@ -1,10 +1,6 @@
-<<<<<<< HEAD
+
 import { defineEventHandler, readBody, createError } from "h3";
-import bcrypt from "bcryptjs";
-=======
-import { defineEventHandler, readBody, createError, setCookie } from "h3";
 import bcrypt from "bcrypt";
->>>>>>> c7ead8ab9e1697494b8dd6ea769d8cccdecdede7
 import pool from "../../utils/db";
 import { signToken } from "../../utils/jwt";
 import { logActivity } from "../../utils/activity";

@@ -46,6 +46,19 @@
                 <label class="form-label">Usia</label>
                 <input v-model="form.usia" type="number" min="0" class="form-control" readonly />
               </div>
+              <div class="col-md-4">
+                <label class="form-label">Jenis Kelamin</label>
+                <div>
+                  <label class="form-check form-check-inline">
+                    <input v-model="form.jenis_kelamin" class="form-check-input" type="radio" value="Laki-laki" />
+                    <span class="form-check-label">Laki-laki</span>
+                  </label>
+                  <label class="form-check form-check-inline">
+                    <input v-model="form.jenis_kelamin" class="form-check-input" type="radio" value="Perempuan" />
+                    <span class="form-check-label">Perempuan</span>
+                  </label>
+                </div>
+              </div>
               <div class="col-12">
                 <div class="card">
                   <div class="card-body">
@@ -225,6 +238,7 @@ const form = reactive({
   tempat_lahir: "",
   tanggal_lahir: "",
   usia: null,
+  jenis_kelamin: "",
   alamat_lengkap: "",
   id_kecamatan: "",
   kabupaten: "",
@@ -391,6 +405,7 @@ onMounted(async () => {
         tempat_lahir: d.tempat_lahir || "",
         tanggal_lahir: d.tanggal_lahir ? d.tanggal_lahir.split("T")[0] : "",
         usia: d.usia,
+        jenis_kelamin: d.jenis_kelamin || "",
         alamat_lengkap: d.alamat_lengkap || "",
         id_kecamatan: d.id_kecamatan || "",
         kabupaten: d.kabupaten || "",

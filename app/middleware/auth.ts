@@ -33,8 +33,4 @@ export default defineNuxtRouteMiddleware(async (to) => {
     tokenCookie.value = null
     return navigateTo("/login")
   }
-<<<<<<< HEAD
-})  
-=======
 })
->>>>>>> c7ead8ab9e1697494b8dd6ea769d8cccdecdede7

@@ -32,6 +32,26 @@ export default defineNitroPlugin(async () => {
       console.log("[Migration] Kolom last_session berhasil ditambahkan")
     }
 
+    const [genderRows] = await conn.query(
+      "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'pegawai' AND COLUMN_NAME = 'jenis_kelamin'",
+      [process.env.DB_NAME || "kepegawaian_db"],
+    )
+
+    if ((genderRows as any[]).length === 0) {
+      await conn.query("ALTER TABLE pegawai ADD COLUMN `jenis_kelamin` enum('Laki-laki','Perempuan') NULL AFTER `nama_pegawai`")
+      console.log("[Migration] Kolom jenis_kelamin berhasil ditambahkan")
+    }
+
+    const [userGenderRows] = await conn.query(
+      "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'user' AND COLUMN_NAME = 'gender'",
+      [process.env.DB_NAME || "kepegawaian_db"],
+    )
+
+    if ((userGenderRows as any[]).length === 0) {
+      await conn.query("ALTER TABLE user ADD COLUMN `gender` enum('Laki-laki','Perempuan') NULL AFTER `nama`")
+      console.log("[Migration] Kolom gender di tabel user berhasil ditambahkan")
+    }
+
     await conn.end()
   } catch (err) {
     console.error("[Migration] Gagal:", err)

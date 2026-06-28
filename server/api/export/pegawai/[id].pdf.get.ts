@@ -1,9 +1,10 @@
 import { defineEventHandler, getRouterParam, setHeader, createError } from "h3"
 import pool from "../../../utils/db"
-import PdfPrinter from "pdfmake"
+import pdfmake from "pdfmake"
 
 export default defineEventHandler(async (event) => {
-  const id = getRouterParam(event, "id")
+  const path = event.path || ""
+  const id = getRouterParam(event, "id") || path.match(/\/(\d+)\.pdf$/)?.[1]
 
   const [pegawai] = await pool.query(
     `SELECT p.*, mj.nama as jabatan, md.nama as departemen,
@@ -32,13 +33,6 @@ export default defineEventHandler(async (event) => {
     (pd: any) => `${pd.tingkat_pendidikan || "-"} / ${pd.nama_sekolah || "-"} / ${pd.tahun_lulus || "-"}`,
   )
 
-  const printer = new PdfPrinter({
-    Roboto: {
-      normal: "node_modules/@fontsource/roboto/files/roboto-latin-400-normal.woff",
-      bold: "node_modules/@fontsource/roboto/files/roboto-latin-700-normal.woff",
-    },
-  })
-
   const docDef: any = {
     content: [
       { text: "Detail Pegawai", style: "header" },
@@ -50,6 +44,7 @@ export default defineEventHandler(async (event) => {
       { text: `Tempat Lahir: ${p.tempat_lahir || "-"}` },
       { text: `Tanggal Lahir: ${p.tanggal_lahir ? new Date(p.tanggal_lahir).toLocaleDateString("id-ID") : "-"}` },
       { text: `Usia: ${p.usia || "-"} tahun` },
+      { text: `Jenis Kelamin: ${p.jenis_kelamin || "-"}` },
       { text: `Status Kawin: ${p.status_kawin || "-"}` },
       { text: `Jumlah Anak: ${p.jumlah_anak || 0}` },
       { text: `Alamat: ${p.alamat_lengkap || "-"}, ${p.kecamatan || "-"}, ${p.kabupaten || "-"}, ${p.provinsi || "-"}` },
@@ -67,17 +62,17 @@ export default defineEventHandler(async (event) => {
     },
   }
 
-  const pdfDoc = printer.createPdfKitDocument(docDef)
-  const chunks: Buffer[] = []
+  pdfmake.fonts = {
+    Roboto: {
+      normal: "node_modules/pdfmake/fonts/Roboto/Roboto-Regular.ttf",
+      bold: "node_modules/pdfmake/fonts/Roboto/Roboto-Medium.ttf",
+    },
+  }
 
-  return new Promise((resolve) => {
-    pdfDoc.on("data", (chunk: Buffer) => chunks.push(chunk))
-    pdfDoc.on("end", () => {
-      const pdfBuffer = Buffer.concat(chunks)
-      setHeader(event, "Content-Type", "application/pdf")
-      setHeader(event, "Content-Disposition", `attachment; filename=pegawai-${p.nip || id}.pdf`)
-      resolve(pdfBuffer)
-    })
-    pdfDoc.end()
-  })
+  const doc = pdfmake.createPdf(docDef)
+  const pdfBuffer = await doc.getBuffer()
+
+  setHeader(event, "Content-Type", "application/pdf")
+  setHeader(event, "Content-Disposition", `attachment; filename=pegawai-${p.nip || id}.pdf`)
+  return pdfBuffer
 })
