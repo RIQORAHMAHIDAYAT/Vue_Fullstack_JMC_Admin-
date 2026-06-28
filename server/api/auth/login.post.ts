@@ -72,6 +72,12 @@ export default defineEventHandler(async (event) => {
 
   console.log("🔐 JWT created:", token)
 
+  // Simpan last_login dan last_session ke database
+  await pool.execute(
+    "UPDATE user SET last_login = NOW(), last_session = ? WHERE id = ?",
+    [token, user.id],
+  )
+
   // --- SIMPAN COOKIE SESSION ---
   // httpOnly: false agar Nuxt useCookie() bisa membaca token di client-side middleware
   // Token tetap aman karena divalidasi ulang ke server di setiap request
