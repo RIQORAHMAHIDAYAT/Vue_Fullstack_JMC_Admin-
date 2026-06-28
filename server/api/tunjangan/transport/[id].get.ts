@@ -1,9 +1,12 @@
-import { defineEventHandler, getRouterParam, getQuery, createError } from "h3"
+import { defineEventHandler, getRouterParam, createError } from "h3"
 import pool from "../../../utils/db"
 
 export default defineEventHandler(async (event) => {
   const id = getRouterParam(event, "id")
-  const [year, month] = id!.split("-")
+  if (!id || !id.includes("-")) {
+    throw createError({ statusCode: 400, message: "Format ID tidak valid (tahun-bulan)" })
+  }
+  const [year, month] = id.split("-")
 
   const [rows] = await pool.query(
     `SELECT tt.id, p.nama_pegawai as nama, tt.km, tt.hari_kerja, tt.nominal
@@ -14,11 +17,6 @@ export default defineEventHandler(async (event) => {
     [Number(year), Number(month)],
   )
 
-  const data = rows as any[]
-  if (data.length === 0) {
-    throw createError({ statusCode: 404, message: "Data tunjangan tidak ditemukan" })
-  }
-
   const bulanIndo = ["", "Januari", "Februari", "Maret", "April", "Mei", "Juni",
     "Juli", "Agustus", "September", "Oktober", "November", "Desember"]
 
@@ -28,7 +26,7 @@ export default defineEventHandler(async (event) => {
       bulan: `${bulanIndo[Number(month)]} ${year}`,
       tahun: Number(year),
       bulan_num: Number(month),
-      penerima: data,
+      penerima: rows as any[],
     },
   }
 })
