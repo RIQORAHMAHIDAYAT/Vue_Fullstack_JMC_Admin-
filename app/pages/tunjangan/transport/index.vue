@@ -3,7 +3,6 @@
     <div class="card-header">
       <div class="d-flex gap-2 ms-auto">
         <select v-model="filterTahun" class="form-select" style="width: 140px">
-          <option value="">Semua Tahun</option>
           <option v-for="t in tahunOptions" :key="t" :value="t">{{ t }}</option>
         </select>
       </div>
@@ -16,17 +15,21 @@
             <th>Bulan</th>
             <th class="text-center">Total Penerima</th>
             <th class="text-center">Total Tunjangan</th>
+            <th class="text-center">Status</th>
             <th class="text-center">Aksi</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-if="loading"><td colspan="5" class="text-center py-4">Memuat data...</td></tr>
-          <tr v-else-if="data.length === 0"><td colspan="5" class="text-center py-4">Tidak ada data</td></tr>
-          <tr v-for="(item, index) in data" :key="item.id">
+          <tr v-if="loading"><td colspan="6" class="text-center py-4">Memuat data...</td></tr>
+          <tr v-for="(item, index) in data" :key="item.id" :class="{ 'table-muted': !item.sudah_dihitung }">
             <td class="text-center">{{ index + 1 }}</td>
             <td>{{ item.bulan }}</td>
             <td class="text-center">{{ item.total_penerima }}</td>
             <td class="text-end">{{ formatRupiah(item.total_nominal) }}</td>
+            <td class="text-center">
+              <span v-if="item.sudah_dihitung" class="badge bg-success">Selesai</span>
+              <span v-else class="badge bg-secondary">Belum</span>
+            </td>
             <td class="text-center">
               <NuxtLink :to="`/tunjangan/transport/detail/${item.id}`" class="btn btn-primary btn-sm">Detail</NuxtLink>
             </td>
@@ -58,7 +61,7 @@ async function fetchData() {
   loading.value = true
   try {
     const params = new URLSearchParams()
-    if (filterTahun.value) params.set("tahun", String(filterTahun.value))
+    params.set("tahun", String(filterTahun.value))
     const res = await get(`/tunjangan/transport?${params.toString()}`)
     data.value = res.data
   } catch {} finally { loading.value = false }

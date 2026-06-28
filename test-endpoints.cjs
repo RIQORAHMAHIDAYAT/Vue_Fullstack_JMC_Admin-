@@ -2,7 +2,7 @@ const http = require('http');
 
 const postData = JSON.stringify({ username: 'admin2', password: 'admin123' });
 const loginOpts = {
-  hostname: 'localhost', port: 3000, path: '/api/auth/login', method: 'POST',
+  hostname: 'localhost', port: 3001, path: '/api/auth/login', method: 'POST',
   headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(postData) }
 };
 
@@ -27,7 +27,7 @@ const loginReq = http.request(loginOpts, (loginRes) => {
     function testNext() {
       if (i >= endpoints.length) return;
       const ep = endpoints[i++];
-      http.get({ hostname: 'localhost', port: 3000, path: ep, headers: { 'Authorization': 'Bearer ' + token } }, (res) => {
+      http.get({ hostname: 'localhost', port: 3001, path: ep, headers: { 'Authorization': 'Bearer ' + token } }, (res) => {
         let data = '';
         res.on('data', (chunk) => data += chunk);
         res.on('end', () => {

@@ -60,6 +60,10 @@
             </div>
           </a>
           <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
+            <NuxtLink to="/profile" class="dropdown-item">
+              Profil Saya
+            </NuxtLink>
+            <div class="dropdown-divider"></div>
             <a href="javascript:;" class="dropdown-item text-danger" @click="handleLogout">
               Logout
             </a>

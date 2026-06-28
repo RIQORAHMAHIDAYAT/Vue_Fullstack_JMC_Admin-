@@ -2,6 +2,7 @@ import pool from "./db"
 import { createError, H3Event } from "h3"
 
 const MODULE_MAP: Array<{ pattern: string; module: string | null }> = [
+  { pattern: "auth/me", module: "my_profile" },
   { pattern: "dashboard", module: "dashboard" },
   { pattern: "activity", module: "modul_log" },
   { pattern: "master/*", module: "modul_pegawai" },

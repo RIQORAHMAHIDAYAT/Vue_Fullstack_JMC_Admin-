@@ -18,6 +18,8 @@ export default defineEventHandler(async (event) => {
 
   if (body.id_role !== undefined) { updates.push("id_role=?"); params.push(body.id_role) }
   if (body.id_pegawai !== undefined) { updates.push("id_pegawai=?"); params.push(body.id_pegawai) }
+  if (body.id_jabatan !== undefined) { updates.push("id_jabatan=?"); params.push(body.id_jabatan) }
+  if (body.id_departemen !== undefined) { updates.push("id_departemen=?"); params.push(body.id_departemen) }
   if (body.username !== undefined) { updates.push("username=?"); params.push(body.username) }
   if (body.nama !== undefined) { updates.push("nama=?"); params.push(body.nama) }
   if (body.email !== undefined) { updates.push("email=?"); params.push(body.email) }

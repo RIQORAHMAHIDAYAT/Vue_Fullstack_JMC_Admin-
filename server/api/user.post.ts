@@ -21,11 +21,13 @@ export default defineEventHandler(async (event) => {
 
   try {
     const [result] = await pool.execute(
-      `INSERT INTO user (id_role, id_pegawai, username, password_hash, nama, email, disabled)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO user (id_role, id_pegawai, id_jabatan, id_departemen, username, password_hash, nama, email, disabled)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         body.id_role || null,
         body.id_pegawai || null,
+        body.id_jabatan || null,
+        body.id_departemen || null,
         body.username,
         passwordHash,
         body.nama || null,

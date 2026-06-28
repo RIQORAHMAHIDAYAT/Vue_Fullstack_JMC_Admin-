@@ -32,6 +32,15 @@ export function useAuth() {
     const res = await post<any>("/auth/login", { username, password, recaptchaToken })
 
     setToken(res.token)
+    if (remember) {
+      localStorage.setItem("token", res.token)
+    } else {
+      localStorage.removeItem("token")
+    }
+    const payload = JSON.parse(atob(res.token.split(".")[1]))
+    console.log("✅ JWT received:", res.token)
+    console.log("📦 JWT payload:", payload)
+    console.log("💾 Remember Me:", remember ? "ON (token saved to localStorage)" : "OFF")
     user.value = res.user
     permissions.value = res.permissions || []
     isLoggedIn.value = true
@@ -45,6 +54,7 @@ export function useAuth() {
       // ignore
     }
     setToken(null)
+    localStorage.removeItem("token")
     user.value = null
     permissions.value = []
     isLoggedIn.value = false

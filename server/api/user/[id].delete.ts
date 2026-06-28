@@ -6,6 +6,11 @@ export default defineEventHandler(async (event) => {
   const id = getRouterParam(event, "id")
   const auth = event.context.auth
 
+  // Cegah user menghapus akun dirinya sendiri
+  if (auth?.id && String(auth.id) === String(id)) {
+    throw createError({ statusCode: 403, message: "Tidak dapat menghapus akun diri sendiri" })
+  }
+
   const [existing] = await pool.query("SELECT username FROM user WHERE id = ?", [id])
   if ((existing as any[]).length === 0) {
     throw createError({ statusCode: 404, message: "User tidak ditemukan" })

@@ -23,7 +23,7 @@ export default defineEventHandler(async (event) => {
   const total = countRows[0].total
 
   const [rows] = await pool.query(
-    `SELECT u.id, u.username, u.nama, u.email, u.disabled as isActive, u.last_login, u.created_at,
+    `SELECT u.id, u.id_role, u.id_pegawai, u.username, u.nama, u.email, (u.disabled = 0) as isActive, u.last_login, u.created_at,
             ur.nama_role as role, p.nama_pegawai, mj.nama as jabatan, md.nama as departemen
      FROM user u
      LEFT JOIN user_role ur ON u.id_role = ur.id

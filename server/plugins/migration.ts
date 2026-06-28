@@ -22,6 +22,16 @@ export default defineNitroPlugin(async () => {
       console.log("[Migration] Kolom jenis_kontrak berhasil ditambahkan")
     }
 
+    const [sessionRows] = await conn.query(
+      "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'user' AND COLUMN_NAME = 'last_session'",
+      [process.env.DB_NAME || "kepegawaian_db"],
+    )
+
+    if ((sessionRows as any[]).length === 0) {
+      await conn.query("ALTER TABLE user ADD COLUMN `last_session` TEXT NULL AFTER `last_login`")
+      console.log("[Migration] Kolom last_session berhasil ditambahkan")
+    }
+
     await conn.end()
   } catch (err) {
     console.error("[Migration] Gagal:", err)

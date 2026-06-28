@@ -1,24 +1,21 @@
 <template>
-  <NuxtLayout name="default">
-    <template #actions>
-      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal-add" @click="openAdd">
-        <IconPlus stroke="3" size="20" />Tambah
-      </button>
-    </template>
-    <div class="card">
-      <div class="card-header">
-        <div class="d-flex gap-2 ms-auto">
-          <select v-model="filterRole" class="form-select" style="width: 160px">
-            <option value="">Semua Role</option>
-            <option v-for="r in roleList" :key="r.id" :value="r.id">{{ r.nama_role }}</option>
-          </select>
-          <div class="input-group">
-            <input type="text" v-model="search" class="form-control" placeholder="Cari..." @input="fetchData" />
-            <button class="btn" type="button"><IconSearch stroke="2" /></button>
-          </div>
+  <div class="card">
+    <div class="card-header">
+      <div class="d-flex gap-2 ms-auto">
+        <select v-model="filterRole" class="form-select" style="width: 160px">
+          <option value="">Semua Role</option>
+          <option v-for="r in roleList" :key="r.id" :value="r.id">{{ r.nama_role }}</option>
+        </select>
+        <div class="input-group">
+          <input type="text" v-model="search" class="form-control" placeholder="Cari..." @input="fetchData" />
+          <button class="btn" type="button"><IconSearch stroke="2" /></button>
         </div>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal-add" @click="openAdd">
+          <IconPlus stroke="3" size="20" /> Tambah
+        </button>
       </div>
-      <div class="table-responsive card-body p-0">
+    </div>
+    <div class="table-responsive card-body p-0">
         <table class="table table-vcenter">
           <thead>
             <tr>
@@ -36,14 +33,14 @@
             <tr v-for="(item, index) in data" :key="item.id">
               <td class="text-center">{{ index + 1 }}</td>
               <td class="text-nowrap">
-                <a href="javascript:;" class="text-dark" title="Edit" @click="openEdit(item)">
+                <a href="javascript:;" class="text-dark" title="Edit" data-bs-toggle="modal" data-bs-target="#modal-add" @click="openEdit(item)">
                   <IconPencil stroke="1" size="20" />
                 </a>
                 <a href="javascript:;" class="text-danger" title="Hapus" @click="hapusUser(item.id)">
                   <IconTrash stroke="1" size="20" />
                 </a>
               </td>
-              <td>{{ item.nama }}</td>
+              <td>{{ item.nama_pegawai || item.nama }}</td>
               <td>{{ item.username }}</td>
               <td>{{ item.role || '-' }}</td>
               <td>{{ item.isActive ? 'Aktif' : 'Nonaktif' }}</td>
@@ -76,7 +73,7 @@
           </div>
           <div class="modal-body">
             <div class="mb-3" style="position: relative;">
-              <label class="form-label">Nama Pegawai</label>
+              <label class="form-label required">Nama Pengguna</label>
               <input
                 ref="pegawaiInput"
                 v-model="pegawaiSearch"
@@ -99,7 +96,7 @@
                   style="cursor: pointer;"
                   @mousedown.prevent="pilihPegawai(p)"
                 >
-                  {{ p.nama }} ({{ p.nip }})
+                  {{ p.nama_pegawai || p.nama }} ({{ p.nip }})
                 </li>
               </ul>
             </div>
@@ -108,9 +105,22 @@
               <input v-model="form.username" type="text" class="form-control" minlength="6" @keyup="validasiUsername" />
               <small class="text-secondary">Min 6 karakter, huruf kecil & angka</small>
             </div>
-            <div class="mb-3">
-              <label class="form-label">Nama</label>
-              <input v-model="form.nama" type="text" class="form-control" />
+
+            <div class="row">
+              <div class="col-6 mb-3">
+                <label class="form-label required">Jabatan</label>
+                <select v-model="form.id_jabatan" class="form-select">
+                  <option value="">Pilih Jabatan</option>
+                  <option v-for="j in jabatanList" :key="j.id" :value="j.id">{{ j.nama }}</option>
+                </select>
+              </div>
+              <div class="col-6 mb-3">
+                <label class="form-label required">Departemen</label>
+                <select v-model="form.id_departemen" class="form-select">
+                  <option value="">Pilih Departemen</option>
+                  <option v-for="d in departemenList" :key="d.id" :value="d.id">{{ d.nama }}</option>
+                </select>
+              </div>
             </div>
             <div class="mb-3">
               <label class="form-label">Role</label>
@@ -148,14 +158,13 @@
         </div>
       </div>
     </div>
-  </NuxtLayout>
 </template>
 
 <script setup>
-definePageMeta({ title: "Manajemen User", layout: false, middleware: "auth" })
+definePageMeta({ title: "Manajemen User", middleware: "auth" })
 useSeoMeta({ title: "Manajemen User" })
 import { IconPencil, IconPlus, IconSearch, IconTrash, IconEye, IconEyeOff } from "@tabler/icons-vue"
-const { get, post, put, del } = useApi()
+const { get, post, put, delete: apiDelete } = useApi()
 
 const data = ref([])
 const roleList = ref([])
@@ -181,6 +190,8 @@ const form = reactive({
   nama: "",
   password: "",
   id_pegawai: "",
+  id_jabatan: "",
+  id_departemen: "",
   id_role: "",
   disabled: false,
 })
@@ -215,9 +226,9 @@ function onPegawaiBlur() {
 }
 
 function pilihPegawai(p) {
-  pegawaiSearch.value = p.nama
+  pegawaiSearch.value = p.nama_pegawai || p.nama
   form.id_pegawai = p.id
-  form.nama = p.nama || ""
+  form.nama = p.nama_pegawai || p.nama || ""
   pegawaiSuggestions.value = []
   pegawaiDropdownOpen.value = false
 }
@@ -227,6 +238,8 @@ function resetForm() {
   form.nama = ""
   form.password = ""
   form.id_pegawai = ""
+  form.id_jabatan = ""
+  form.id_departemen = ""
   form.id_role = ""
   form.disabled = false
   pegawaiSearch.value = ""
@@ -280,25 +293,32 @@ function openEdit(item) {
   form.nama = item.nama || ""
   form.password = ""
   form.id_pegawai = item.id_pegawai || ""
+  form.id_jabatan = item.id_jabatan || ""
+  form.id_departemen = item.id_departemen || ""
   pegawaiSearch.value = item.nama_pegawai || item.nama || ""
   form.id_role = item.id_role || ""
   form.disabled = !item.isActive
 }
 
 async function simpanUser() {
+  if (!form.id_pegawai) return alert("Silakan pilih Nama Pengguna dari daftar autosuggest!")
   if (!form.username || form.username.length < 6) return alert("Username minimal 6 karakter")
   if (!editing.value && !form.password) return alert("Password wajib diisi")
 
   submitting.value = true
   try {
     const payload = { ...form }
-    if (payload.id_pegawai) payload.id_pegawai = Number(payload.id_pegawai)
-    if (payload.id_role) payload.id_role = Number(payload.id_role)
+    payload.id_pegawai = payload.id_pegawai ? Number(payload.id_pegawai) : null
+    payload.id_role = payload.id_role ? Number(payload.id_role) : null
+    payload.id_jabatan = payload.id_jabatan ? Number(payload.id_jabatan) : null
+    payload.id_departemen = payload.id_departemen ? Number(payload.id_departemen) : null
 
     if (editing.value) {
       await put(`/user/${editId.value}`, payload)
+      alert("Update user berhasil!")
     } else {
       await post("/user", payload)
+      alert("Tambah user berhasil!")
     }
 
     resetForm()
@@ -314,7 +334,8 @@ async function simpanUser() {
 async function hapusUser(id) {
   if (!confirm("Hapus user ini?")) return
   try {
-    await del(`/user/${id}`)
+    await apiDelete(`/user/${id}`)
+    alert("User berhasil dihapus!")
     await fetchData()
   } catch (err) {
     alert(err.message)
@@ -323,10 +344,19 @@ async function hapusUser(id) {
 
 watch([search, filterRole, page], fetchData)
 
+const jabatanList = ref([])
+const departemenList = ref([])
+
 onMounted(async () => {
   try {
-    const roleRes = await get("/role")
+    const [roleRes, jabRes, depRes] = await Promise.all([
+      get("/role"),
+      get("/master/jabatan"),
+      get("/master/departemen")
+    ])
     roleList.value = roleRes.data
+    jabatanList.value = jabRes.data
+    departemenList.value = depRes.data
   } catch {}
   await fetchData()
 })
